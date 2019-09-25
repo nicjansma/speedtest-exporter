@@ -11,10 +11,10 @@ let format = (results) => {
   let output = '';
   const lb = '\n';
 
-  output += `# TYPE speedtest_bits_per_second gauge${lb}`;
-  output += `# HELP speedtest_bits_per_second Speed measured against speedtest.net in megabits per seconds${lb}`;
-  output += `speedtest_bits_per_second{direction="downstream"} ${results.speeds.download}${lb}`;
-  output += `speedtest_bits_per_second{direction="upstream"} ${results.speeds.upload}${lb}`;
+  output += `# TYPE speedtest_megabits_per_second gauge${lb}`;
+  output += `# HELP speedtest_megabits_per_second Speed measured in megabits per second${lb}`;
+  output += `speedtest_megabits_per_second{direction="downstream"} ${results.speeds.download}${lb}`;
+  output += `speedtest_megabits_per_second{direction="upstream"} ${results.speeds.upload}${lb}`;
 
   output += `# TYPE speedtest_ping gauge${lb}`;
   output += `# HELP speedtest_ping Ping in ms${lb}`;
@@ -33,7 +33,7 @@ let test = () => speedTest({
   maxTime: process.env.MAX_TIME,
   pingCount: process.env.PING_COUNT,
   maxServers: process.env.MAX_SERVERS,
-  serverId: process.env.SERVER_ID, //"7839"
+  serverId: process.env.SERVER_ID,
   serversUrl: process.env.SERVERS_URL
 })
  
