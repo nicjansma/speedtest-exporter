@@ -6,7 +6,7 @@ Prometheus exporter for network speedtests. It is built on the [speedtest-net](h
 
 It is possible to use environment variables in order to configure the exporter.
 
-* `CRONTAB` - the crontab code for test frequency definition (https://crontab.guru)
+* `CRONTAB` - the crontab code for test frequency definition, default "* * * * *" (https://crontab.guru)
 * `PROXY` - the proxy for upload or download, support http and https (example : "http://proxy:3128")
 * `MAX_TIME` - the maximum length (in ms) of a single test run (upload or download)
 * `PING_COUNT` - the number of close servers to ping to find the fastest one
