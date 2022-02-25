@@ -17,7 +17,8 @@ It is possible to use environment variables in order to configure the exporter.
 ## Metrics
 
 Metrics are exposed at port `9696`.
-The following is an example of the exposed metrics.
+
+The following is an example of the exposed metrics:
 
 ```
 # TYPE speedtest_megabits_per_second gauge
@@ -28,3 +29,9 @@ speedtest_megabits_per_second{direction="upstream"} 120.216
 # HELP speedtest_ping Ping in ms
 speedtest_ping 16.4
 ```
+
+## Credit
+
+Built on top of [stefanwalther/speedtest-exporter](https://github.com/stefanwalther/speedtest-exporter), taking parts of
+[cattanisimone/speedtest-exporter](https://github.com/cattanisimone/speedtest-exporter) and
+[speedtest-exporter](https://github.com/lleox/speedtest-exporter).

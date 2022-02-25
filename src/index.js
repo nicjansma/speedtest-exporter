@@ -1,62 +1,54 @@
+//
+// Imports
+//
 const schedule = require('node-schedule');
-const speedTest = require('speedtest-net');
-const toPromise = require('event-to-promise');
+const Koa = require('koa');
+const _ = require('koa-route');
 
-// --------------------------------------------------------------------------
-// --------------------------------------------------------------------------
+const SpeedTest = require('./speed-test');
+const promFormatter = require('./prom-formatter');
 
-let format = (results) => {
-  if(!results) return ''
-  
-  let output = '';
-  const lb = '\n';
+//
+// Locals
+//
+let testResults = null;
 
-  output += `# TYPE speedtest_megabits_per_second gauge${lb}`;
-  output += `# HELP speedtest_megabits_per_second Speed measured in megabits per second${lb}`;
-  output += `speedtest_megabits_per_second{direction="downstream"} ${results.speeds.download}${lb}`;
-  output += `speedtest_megabits_per_second{direction="upstream"} ${results.speeds.upload}${lb}`;
+const app = new Koa();
 
-  output += `# TYPE speedtest_ping gauge${lb}`;
-  output += `# HELP speedtest_ping Ping in ms${lb}`;
-  output += `speedtest_ping ${results.server.ping}${lb}`;
+//
+// Functoins
+//
+const routes = {
+  metrics: async ctx => {
+    console.log('/metrics');
 
-  return output;
+    ctx.type = 'text/plain; version=0.0.4';
+
+    if (testResults) {
+      ctx.body = promFormatter.format(testResults);
+    }
+  }
+};
+
+async function runSpeedTest() {
+  let test = new SpeedTest();
+
+  await test.run().then(v => {
+    testResults = v;
+
+    console.log('speedtest: ', v);
+  }).catch(e => {
+    console.error('error: ', e);
+  });
 }
 
-// --------------------------------------------------------------------------
-// --------------------------------------------------------------------------
+//
+// Runtime
+//
+app.use(_.get('/metrics/', routes.metrics));
 
-var status = undefined
+app.listen(9696);
 
-let test = () => speedTest({
-  proxy: process.env.PROXY,
-  maxTime: process.env.MAX_TIME,
-  pingCount: process.env.PING_COUNT,
-  maxServers: process.env.MAX_SERVERS,
-  serverId: process.env.SERVER_ID,
-  serversUrl: process.env.SERVERS_URL
-})
- 
-schedule.scheduleJob((process.env.CRONTAB || '* * * * *'), () => {
-  toPromise(test(), 'data')
-    .then(result => {
-      console.log(result)
-      return result
-    })
-    .then(result => { status = result })
-});
+schedule.scheduleJob((process.env.CRONTAB || '* * * * *'), runSpeedTest);
 
-// --------------------------------------------------------------------------
-// --------------------------------------------------------------------------
-
-const express = require('express')
-const app = express()
-
-app.use(require('cors')())
-
-app.get('/metrics', (req, res) => {
-  console.log('GET /metrics');
-  res.type('text/plain; version=0.0.4').send(format(status))
-})
-
-app.listen(9696, () => console.log(`App listening on port 9696`))
+runSpeedTest();
